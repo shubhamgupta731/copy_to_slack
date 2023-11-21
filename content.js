@@ -63,16 +63,27 @@ function htmlToMarkdown(element, listType = '', depth = 0, recursion_depth = 0) 
 
 function convertList(listElement, listType, depth) {
   let markdown = '';
-  let itemNumber = 1;
+  let itemNumber = 1; // Counter for ordered list numbering
 
-  listElement.childNodes.forEach(function(node, index) {
-    if (node.tagName && node.tagName.toLowerCase() === 'li') {
-      let bullet = listType === '-' ? '- ' : `${itemNumber++}. `;
-      let prefix = index === 0 ? '\n' : ''; // New line for the first list item
-      markdown += `${prefix}${' '.repeat(2 * depth)}${bullet}${htmlToMarkdown(node, listType, depth + 1)}\n`;
+  listElement.childNodes.forEach(function(node) {
+    if (node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === 'li') {
+      // Determine the bullet or number prefix
+      let prefix = listType === '-' ? '- ' : `${itemNumber++}. `;
+      // Convert the list item content
+      let listItemContent = htmlToMarkdown(node, listType, depth + 1);
+
+      // Check for nested lists within the list item
+      let nestedList = '';
+      node.childNodes.forEach(function(childNode) {
+        if (childNode.nodeType === Node.ELEMENT_NODE && (childNode.tagName.toLowerCase() === 'ul' || childNode.tagName.toLowerCase() === 'ol')) {
+          let nestedListType = childNode.tagName.toLowerCase() === 'ul' ? '-' : '1.';
+          nestedList += convertList(childNode, nestedListType, depth + 1);
+        }
+      });
+
+      markdown += `${' '.repeat(2 * depth)}${prefix}${listItemContent}\n${nestedList}`;
     }
   });
 
   return markdown;
 }
-
