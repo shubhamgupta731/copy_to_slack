@@ -18,6 +18,6 @@
     }
   ],
   "host_permissions": [
-    "httpsL//chat.openai.com"
+    "<all_urls>"
   ]
 }
