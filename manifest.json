@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Copy to Slack",
+  "version": "1.0",
+  "description": "Copy selected text to Slack.",
+  "permissions": ["activeTab", "clipboardWrite", "scripting"],
+  "action": {
+    "default_popup": "",
+    "default_icon": {}
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://chat.openai.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}
