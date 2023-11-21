@@ -9,11 +9,17 @@ document.addEventListener('keydown', function(e) {
 
     // Convert HTML to Markdown
     let markdown = htmlToMarkdown(container);
-    navigator.clipboard.writeText(markdown);
+    navigator.clipboard.writeText(markdown).catch((error) => {
+      console.error('Clipboard write failed: ', error);
+    });
   }
 });
 
-function htmlToMarkdown(element, listType = '', depth = 0) {
+function htmlToMarkdown(element, listType = '', depth = 0, recursion_depth = 0) {
+  if (recursion_depth > 512) {
+    console.log("Recursion depth reachd");
+    return;
+  }
   let children = element.childNodes;
   let markdownText = '';
   let indent = ' '.repeat(2 * depth); // 2 spaces per indentation level
@@ -26,14 +32,14 @@ function htmlToMarkdown(element, listType = '', depth = 0) {
         case 'strong':
         case 'h3':
         case 'b':
-          markdownText += `*${htmlToMarkdown(node, listType, depth)}*`;
+          markdownText += `*${htmlToMarkdown(node, listType, depth, recursion_depth + 1)}*`;
           break;
         case 'code':
-          markdownText += `\`${htmlToMarkdown(node, listType, depth)}\``;
+          markdownText += `\`${htmlToMarkdown(node, listType, depth, recursion_depth + 1)}\``;
           break;
         case 'em':
         case 'i':
-          markdownText += `*${htmlToMarkdown(node, listType, depth)}*`;
+          markdownText += `*${htmlToMarkdown(node, listType, depth, recursion_depth + 1)}*`;
           break;
         case 'ul':
           markdownText += convertList(node, '-', depth);
@@ -43,11 +49,11 @@ function htmlToMarkdown(element, listType = '', depth = 0) {
           break;
         case 'li':
           let bullet = listType === '-' ? '- ' : `${depth}. `;
-          markdownText += `${indent}${bullet}${htmlToMarkdown(node, listType, depth + 1)}\n`;
+          markdownText += `${indent}${bullet}${htmlToMarkdown(node, listType, depth + 1, recursion_depth + 1)}\n`;
           break;
         // Add more HTML tag cases as needed
         default:
-          markdownText += htmlToMarkdown(node, listType, depth); // Recurse for other elements
+          markdownText += htmlToMarkdown(node, listType, depth, recursion_depth + 1); // Recurse for other elements
       }
     }
   });
