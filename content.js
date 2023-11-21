@@ -17,7 +17,7 @@ document.addEventListener('keydown', function(e) {
 
 function htmlToMarkdown(element, listType = '', depth = 0, recursion_depth = 0) {
   if (recursion_depth > 512) {
-    console.log("Recursion depth reachd");
+    console.error("Recursion depth reached");
     return;
   }
   let children = element.childNodes;
